@@ -48,4 +48,15 @@ fi
 # container), so removing the file unconditionally is safe.
 rm -f /data/.hermes/gateway.pid
 
+# Optional user-managed startup hook on the persistent volume.
+# Put any custom boot commands in /data/.hermes/startup.sh. The file is sourced
+# (not executed) so it can export environment variables for server.py and any
+# sidecars started below. A non-zero exit aborts container startup because this
+# wrapper runs with `set -e`; use `some_command || true` inside the hook for
+# best-effort commands.
+if [ -f /data/.hermes/startup.sh ]; then
+  # shellcheck disable=SC1091
+  . /data/.hermes/startup.sh
+fi
+
 exec python /app/server.py
